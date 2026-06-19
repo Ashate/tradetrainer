@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: tt_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ttroot2024}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-tradetrainer}
+      MYSQL_USER: ${MYSQL_USER:-ttuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ttpass2024}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - tt_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-ttroot2024}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tt_backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER:-ttuser}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-ttpass2024}
+      DB_NAME: ${MYSQL_DATABASE:-tradetrainer}
+      SECRET_KEY: ${SECRET_KEY:-change-this-in-production-secret-key}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10080
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - tt_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tt_frontend
+    restart: unless-stopped
+    networks:
+      - tt_net
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tt_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8888}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - tt_net
+
+volumes:
+  mysql_data:
+  uploads_data:
+
+networks:
+  tt_net:
+    driver: bridge

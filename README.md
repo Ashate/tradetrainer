@@ -10,17 +10,16 @@ git clone https://github.com/Ashate/tradetrainer.git
 cd tradetrainer
 
 # 2. (可选) 修改 .env 中的密码和密钥
-cp .env .env.local
+vim .env 或 nano .env
 
 # 3. 启动所有服务
-docker compose up -d
+docker compose up -d --build
 
-# 4. 等待约 30 秒后访问
+# 4. 等待构建并启动完成后访问
 open http://localhost:8888
 ```
 
 默认端口: **8888**  
-默认账号: `admin` / `admin123`
 
 ---
 
@@ -70,7 +69,36 @@ tradetrainer/
 
 ---
 
-## K线数据导入
+## K线数据自动拉取
+
+### 方式一
+
+配置tradetrainer/backend/data_fetcher下的symbols_config.json文件,加入需要拉取的标的，然后重构后端:
+```bash
+docker compose down backend
+docker compose build --no-cache
+docker compose up -d
+```
+然后执行
+```bash
+docker exec tt_backend python -m data_fetcher.runner
+```
+更新K线数据
+
+### 方式二
+
+直接在容器中找到symbols_config.json文件并添加相应标的:
+```bash
+docker exec -it tt_backend /bin/bash
+vim data_fetcher/symbols_config.json # 添加所需标的
+```
+然后执行
+```bash
+docker exec tt_backend python -m data_fetcher.runner
+```
+更新K线数据
+
+## K线数据手动导入
 
 ### 方式一：Web 界面
 点击右上角「导入数据」按钮，上传 CSV 文件。

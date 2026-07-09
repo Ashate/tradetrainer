@@ -1,0 +1,1 @@
+docker compose exec backend python scripts/check_kline_gaps_full.py BTCUSDT

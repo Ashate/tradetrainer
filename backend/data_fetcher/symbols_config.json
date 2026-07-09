@@ -1,0 +1,22 @@
+{
+  "_说明": "标的配置文件。crypto 用 Binance 拉取，支持周期: 5m,15m,30m,1h,1d。futures(国内期货)和stock(A股)都用akshare拉取：futures支持5m,15m,30m,1h,1d(akshare新浪期货接口提供1分钟数据，系统自动聚合)；stock仅支持1d。新增标的：直接在对应数组里加一条，保存后等待下次定时任务自动拉取历史数据，或调用 POST /admin/symbols/sync 立即触发首次拉取。",
+
+  "crypto": [
+    { "symbol": "BTCUSDT", "exchange_symbol": "BTC/USDT", "display_name": "比特币" },
+    { "symbol": "ETHUSDT", "exchange_symbol": "ETH/USDT", "display_name": "以太坊" },
+    { "symbol": "SOLUSDT", "exchange_symbol": "SOL/USDT", "display_name": "索纳拉" },
+    { "symbol": "BNBUSDT", "exchange_symbol": "BNB/USDT", "display_name": "币安币" }
+  ],
+
+  "futures": [
+    { "symbol": "AU0", "display_name": "黄金主连" },
+    { "symbol": "CU0", "display_name": "沪铜主连" }
+  ],
+
+  "stock": [
+    { "symbol": "600519", "display_name": "贵州茅台" },
+    { "symbol": "000001", "display_name": "平安银行" }
+  ]
+}
+
+

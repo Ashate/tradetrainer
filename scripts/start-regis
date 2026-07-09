@@ -1,0 +1,1 @@
+docker compose exec backend python scripts/toggle_registration.py on

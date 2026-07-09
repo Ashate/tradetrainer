@@ -6,6 +6,7 @@
 
 ```bash
 # 1. 克隆 / 解压项目
+git clone https://github.com/Ashate/tradetrainer.git
 cd tradetrainer
 
 # 2. (可选) 修改 .env 中的密码和密钥
